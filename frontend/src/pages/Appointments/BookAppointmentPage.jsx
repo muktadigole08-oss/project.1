@@ -29,23 +29,87 @@ export const BookAppointmentPage = () => {
   });
 
   useEffect(() => {
-    departmentService.getAllDepartments().then(setDepartments).catch(console.error);
+    departmentService
+      .getAllDepartments()
+      .then((data) => setDepartments(Array.isArray(data) ? data : []))
+      .catch(console.error);
   }, []);
+
+  // Handle URL query parameters if arriving with doctorId only
+  useEffect(() => {
+    const urlDoctorId = searchParams.get('doctorId');
+    const urlDeptId = searchParams.get('deptId');
+    if (urlDoctorId && !urlDeptId) {
+      doctorService
+        .getDoctorById(Number(urlDoctorId))
+        .then((doc) => {
+          if (doc && doc.departmentId) {
+            setFormData((prev) => ({
+              ...prev,
+              doctorId: String(doc.id),
+              departmentId: String(doc.departmentId),
+            }));
+          }
+        })
+        .catch(console.error);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (formData.departmentId) {
       doctorService
         .getAllDoctors(Number(formData.departmentId))
-        .then(setDoctors)
-        .catch(console.error);
+        .then((data) => {
+          const list = Array.isArray(data) ? data : [];
+          setDoctors(list);
+          // Automatically select physician if doctorId is empty or not in this department
+          setFormData((prev) => {
+            const hasDoctorInList = list.some((d) => String(d.id) === String(prev.doctorId));
+            if (!hasDoctorInList && list.length > 0) {
+              return { ...prev, doctorId: String(list[0].id) };
+            }
+            if (list.length === 0) {
+              return { ...prev, doctorId: '' };
+            }
+            return prev;
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+          setDoctors([]);
+        });
     } else {
-      doctorService.getAllDoctors().then(setDoctors).catch(console.error);
+      doctorService
+        .getAllDoctors()
+        .then((data) => {
+          setDoctors(Array.isArray(data) ? data : []);
+        })
+        .catch((err) => {
+          console.error(err);
+          setDoctors([]);
+        });
     }
   }, [formData.departmentId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'departmentId') {
+      // Trigger doctor re-fetch and auto-selection for the chosen department
+      setFormData((prev) => ({ ...prev, departmentId: value, doctorId: '' }));
+    } else if (name === 'doctorId') {
+      const selectedDoc = doctors.find((d) => String(d.id) === String(value));
+      if (selectedDoc && selectedDoc.departmentId) {
+        setFormData((prev) => ({
+          ...prev,
+          doctorId: value,
+          departmentId: String(selectedDoc.departmentId),
+        }));
+      } else {
+        setFormData((prev) => ({ ...prev, doctorId: value }));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -74,6 +138,8 @@ export const BookAppointmentPage = () => {
       setLoading(false);
     }
   };
+
+  const selectedDoctor = doctors.find((doc) => String(doc.id) === String(formData.doctorId));
 
   return (
     <div className="w-full bg-background py-space-2xl">
@@ -219,7 +285,11 @@ export const BookAppointmentPage = () => {
                   onChange={handleChange}
                   className="w-full px-4 py-3 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:border-secondary focus:ring-1 focus:ring-secondary outline-none text-on-surface font-body-md"
                 >
-                  <option value="">Select Physician</option>
+                  <option value="">
+                    {doctors.length === 0 && formData.departmentId
+                      ? 'No physicians currently assigned'
+                      : 'Select Physician'}
+                  </option>
                   {doctors.map((doc) => (
                     <option key={doc.id} value={doc.id}>
                       {doc.fullName} ({doc.title})
@@ -228,6 +298,48 @@ export const BookAppointmentPage = () => {
                 </select>
               </div>
             </div>
+
+            {/* Specialist Doctor Preview Card */}
+            {selectedDoctor && (
+              <div className="p-space-md rounded-2xl bg-secondary/5 border border-secondary/20 shadow-xs flex flex-col sm:flex-row items-center sm:items-start gap-space-md animate-fadeIn">
+                <img
+                  src={
+                    selectedDoctor.avatarUrl ||
+                    'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=250'
+                  }
+                  alt={selectedDoctor.fullName}
+                  className="w-16 h-16 rounded-full object-cover border-2 border-secondary shrink-0 shadow-sm"
+                />
+                <div className="flex-1 text-center sm:text-left">
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                    <h4 className="font-title-md text-title-md font-bold text-primary">
+                      {selectedDoctor.fullName}
+                    </h4>
+                    {selectedDoctor.rating && (
+                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-secondary/10 text-secondary font-bold">
+                        ★ {selectedDoctor.rating} ({selectedDoctor.reviewCount || 0} reviews)
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-secondary text-body-sm font-medium">
+                    {selectedDoctor.title} • {selectedDoctor.qualifications || selectedDoctor.departmentName}
+                  </p>
+                  {selectedDoctor.availableDays && (
+                    <p className="text-on-surface-variant text-label-xs mt-1">
+                      <span className="font-semibold text-primary">Clinic Schedule:</span> {selectedDoctor.availableDays}
+                    </p>
+                  )}
+                </div>
+                {selectedDoctor.consultationFee && (
+                  <div className="text-center sm:text-right shrink-0">
+                    <span className="block text-label-xs uppercase tracking-wider text-on-surface-variant">Consultation Fee</span>
+                    <span className="text-title-lg font-bold text-primary">
+                      ${Number(selectedDoctor.consultationFee).toFixed(2)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Date & Time */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">

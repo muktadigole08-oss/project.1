@@ -64,9 +64,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/departments/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/doctors/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/insights/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/departments", "/api/departments/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/doctors", "/api/doctors/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/insights", "/api/insights/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/appointments").permitAll() // allows guest booking
                         .requestMatchers(HttpMethod.POST, "/api/contact").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
