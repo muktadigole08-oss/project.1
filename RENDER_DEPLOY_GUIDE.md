@@ -99,7 +99,7 @@ If you prefer to configure each component manually through the Render web UI, fo
    - **Name**: `medicare-frontend`
    - **Branch**: `main`
    - **Root Directory**: `frontend`
-   - **Build Command**: `npm install && npm run build`
+   - **Build Command**: `npm install && (chmod +x node_modules/.bin/* 2>/dev/null || true) && npm run build`
    - **Publish Directory**: `dist`
 4. Expand **Advanced** and add the following **Environment Variable**:
 
