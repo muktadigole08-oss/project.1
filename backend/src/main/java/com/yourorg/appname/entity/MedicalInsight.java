@@ -18,10 +18,10 @@ public class MedicalInsight {
     @Column(nullable = false, length = 80)
     private String category;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(columnDefinition = "TEXT")
     private String summary;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "author_name", nullable = false, length = 120)

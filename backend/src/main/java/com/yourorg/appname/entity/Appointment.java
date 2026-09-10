@@ -47,7 +47,7 @@ public class Appointment {
     @Column(nullable = false, length = 30)
     private AppointmentStatus status = AppointmentStatus.PENDING;
 
-    @Column(name = "symptoms_notes", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "symptoms_notes", columnDefinition = "TEXT")
     private String symptomsNotes;
 
     @Column(name = "created_at", nullable = false)

@@ -1,4 +1,26 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+// Dynamically resolve and normalize the API Base URL for Render cloud deployment & local dev
+const getBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (!envUrl || envUrl.trim() === '') {
+    return '/api';
+  }
+
+  let normalized = envUrl.trim().replace(/\/+$/, '');
+
+  // If provided as hostname only (e.g., medicare-hospital-backend.onrender.com), prepend https://
+  if (!normalized.startsWith('http://') && !normalized.startsWith('https://') && !normalized.startsWith('/')) {
+    normalized = `https://${normalized}`;
+  }
+
+  // Ensure /api path prefix is present to match backend Spring Boot @RequestMapping("/api/...")
+  if (!normalized.endsWith('/api')) {
+    normalized = `${normalized}/api`;
+  }
+
+  return normalized;
+};
+
+export const API_BASE_URL = getBaseUrl();
 
 export const ENDPOINTS = {
   AUTH: {

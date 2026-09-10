@@ -40,7 +40,7 @@ public class Doctor {
     @Column(name = "avatar_url", length = 500)
     private String avatarUrl;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(columnDefinition = "TEXT")
     private String bio;
 
     @Column(name = "available_days", length = 100)

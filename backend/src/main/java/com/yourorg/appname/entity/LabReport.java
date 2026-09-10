@@ -32,7 +32,7 @@ public class LabReport {
     @Column(nullable = false, length = 30)
     private ReportStatus status = ReportStatus.READY;
 
-    @Column(name = "result_summary", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "result_summary", columnDefinition = "TEXT")
     private String resultSummary;
 
     @Column(name = "file_url", length = 500)

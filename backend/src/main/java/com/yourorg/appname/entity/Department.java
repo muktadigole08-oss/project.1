@@ -17,7 +17,7 @@ public class Department {
     @Column(nullable = false, unique = true, length = 50)
     private String code;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false, length = 60)

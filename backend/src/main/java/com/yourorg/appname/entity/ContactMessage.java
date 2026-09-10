@@ -23,7 +23,7 @@ public class ContactMessage {
     @Column(nullable = false, length = 200)
     private String subject;
 
-    @Column(nullable = false, columnDefinition = "NVARCHAR(MAX)")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
 
     @Column(nullable = false, length = 30)
