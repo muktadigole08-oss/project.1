@@ -21,6 +21,7 @@ services:
     dockerContext: .
     region: oregon
     plan: free
+    branch: main
     healthCheckPath: /api/departments
     envVars:
       - key: SPRING_PROFILES_ACTIVE
@@ -43,6 +44,7 @@ services:
     name: medicare-frontend
     rootDir: frontend
     region: oregon
+    branch: main
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     routes:
